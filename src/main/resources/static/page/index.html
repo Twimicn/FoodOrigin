@@ -1,0 +1,89 @@
+<template>
+    <div class="card mt-2 ml-2 mr-2" style="max-width: 550px">
+        <form id="search_form" method="post">
+            <div class="card-body">
+                <div class="form-group">
+                    <a href="#/back" class="btn btn-outline-dark float-right">后台</a>
+                </div>
+                <h5 class="card-title">食品溯源区块链</h5>
+                <div class="form-group">
+                    <label for="txt_id">商品ID</label>
+                    <input type="text" id="txt_id" name="id" class="form-control"/>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-success">查找</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div id="result" style="display: none;">
+        <div class="card mt-2 ml-2 mr-2" style="max-width: 550px;">
+            <div class="card-body">
+                <h5 class="card-title">详情</h5>
+                <p>商品名称:<span id="item_name"></span></p>
+            </div>
+        </div>
+        <div id="plant" class="card mt-2 ml-2 mr-2" style="max-width: 550px;display: none;">
+            <div class="card-body">
+                <h5 class="card-title">种植</h5>
+                <p>种植者:<span id="plant_name"></span></p>
+                <p>记录:<span id="plant_memo"></span></p>
+            </div>
+        </div>
+        <div id="carriage" class="card mt-2 ml-2 mr-2" style="max-width: 550px;display: none;">
+            <div class="card-body">
+                <h5 class="card-title">物流</h5>
+                <p>运输:<span id="carriage_name"></span></p>
+                <p>记录:<span id="carriage_memo"></span></p>
+            </div>
+        </div>
+        <div id="sell" class="card mt-2 ml-2 mr-2" style="max-width: 550px;display: none;">
+            <div class="card-body">
+                <h5 class="card-title">零售</h5>
+                <p>零售商:<span id="sell_name"></span></p>
+                <p>记录:<span id="sell_memo"></span></p>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+    (function () {
+        $('#search_form').submit(function () {
+            var loadingBox = Utils.loadingBox('查询中...');
+            $("#result").hide();
+            $(this).ajaxSubmit({
+                url: $.Eira.data('apiUrl') + 'api/getItem',
+                dataType: 'json',
+                success: function (res) {
+                    if (res.status !== 0) {
+                        Utils.showAlert('#alert_container', res.msg, 'danger', true);
+                    } else {
+                        var data = res.data || {};
+                        $("#result").show();
+                        $("#item_name").text(data.name);
+                        if(data.plant){
+                            $("#plant").show();
+                            $("#plant_name").text(data.plant.data.user);
+                            $("#plant_memo").text(data.plant.data.memo);
+                        }
+                        if(data.carriage){
+                            $("#carriage").show();
+                            $("#carriage_name").text(data.carriage.data.user);
+                            $("#carriage_memo").text(data.carriage.data.memo);
+                        }
+                        if(data.sell){
+                            $("#sell").show();
+                            $("#sell_name").text(data.sell.data.user);
+                            $("#sell_memo").text(data.sell.data.memo);
+                        }
+                    }
+                    loadingBox.hide();
+                }, error: function () {
+                    loadingBox.hide();
+                    Utils.tipBox('服务器发生了一些错误');
+                }
+            });
+            return false;
+        });
+    })();
+</script>
